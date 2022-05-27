@@ -1,10 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const {
-  listContacts,
-  getContactById,
-} = require("../../models/contacts-actions");
+const { listContacts, getContactById } = require("../../models/contacts");
 
 router.get("/", async (req, res, next) => {
   const data = await listContacts();
