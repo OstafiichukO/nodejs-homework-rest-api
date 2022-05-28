@@ -23,11 +23,6 @@ const listContacts = async () => {
 const getContactById = async (contactId) => {
   const contactsList = await readContacts();
   const contact = contactsList.find((el) => el.id === contactId);
-  if (!contact) {
-    console.log(`Contact with id ${contactId} not found!`);
-    return JSON.stringify(`Contact with id ${contactId} not found!`);
-  }
-  // console.table(contact);
   return contact;
 };
 
