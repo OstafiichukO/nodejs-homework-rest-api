@@ -1,68 +1,73 @@
-/* eslint-disable no-unused-vars */
 const express = require("express");
+
+const {
+  listContacts,
+  getContactById,
+  addContact,
+  removeContact,
+  updateContact,
+} = require("../../models/contacts");
+
 const router = express.Router();
-const Joi = require("joi");
-
-const { listContacts, getContactById } = require("../../models/contacts");
-
-const createSchema = Joi.object({
-  name: Joi.string().min(5).max(15).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
-});
-
-const updateSchema = Joi.object({
-  name: Joi.string().optional(),
-  email: Joi.string().email().optional(),
-  phone: Joi.string().optional(),
-}).or("name", "email", "phone");
-
-const idSchema = Joi.object({ id: Joi.string().required() });
 
 router.get("/", async (req, res, next) => {
-  const data = await listContacts();
-  res.status(200).json(data);
-});
-// =======================================
-const validateId = async (req, res, next) => {
   try {
-    const value = await idSchema.validateAsync(req.params);
-  } catch (err) {
-    return res
-      .status(400)
-      .json({ message: `${err.message.replace(/"/g, "")}` });
+    const data = await listContacts();
+    res.status(200).json(data);
+  } catch (e) {
+    next(e);
   }
-  next();
-};
+});
 
-// const getContactById = async (contactId) => {
-//   const contactsList = await readContacts();
-//   const contact = contactsList.find((el) => el.id === contactId);
-//   return contact;
-// };
-// ===========================================
-router.get("/:id", validateId, getContactById);
-// router.get("/:id", async (req, res, next) => {
-//   const { id } = req.params;
-//   const data = await getContactById(id);
-//   if (!data) {
-//     return res.status(404).json({ message: "Contact not found" });
-//   }
-//   res.status(200).json(data);
-//   // const data = await getContactById(req.params.contactId);
-//   // res.json(JSON.stringify(data));
-// });
+router.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const data = await getContactById(id);
+    if (!data) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post("/", async (req, res, next) => {
-  res.json({ message: "template message" });
+  try {
+    const { name, email, phone } = req.body;
+    // const newContact = await addContact(name, email, phone);
+    const newContact = await addContact({ name, email, phone });
+    res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.delete("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const contact = await removeContact(id);
+    if (!contact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    res.status(200).json({ message: "contact deleted" });
+  } catch (error) {
+    next(error);
+  }
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  try {
+    const { name, email, phone } = req.body;
+    const { id } = req.params;
+    const contact = await updateContact(id, name, email, phone);
+    if (!contact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    res.status(200).json(contact);
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
