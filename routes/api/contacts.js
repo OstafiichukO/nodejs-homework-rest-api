@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const Contact = require("../../models/contact");
 
 const {
   listContacts,
@@ -10,13 +11,17 @@ const {
 } = require("../../models/contacts");
 const { validateId, validateCreate, validateUpdate } = require("./validation");
 
+// router.get("/", async (req, res, next) => {
+//   try {
+//     const data = await listContacts();
+//     res.status(200).json(data);
+//   } catch (e) {
+//     next(e);
+//   }
+// });
 router.get("/", async (req, res, next) => {
-  try {
-    const data = await listContacts();
-    res.status(200).json(data);
-  } catch (e) {
-    next(e);
-  }
+  const contacts = await Contact.find();
+  res.json(contacts);
 });
 
 router.get("/:id", validateId, async (req, res, next) => {
@@ -32,14 +37,18 @@ router.get("/:id", validateId, async (req, res, next) => {
   }
 });
 
-router.post("/", validateCreate, async (req, res, next) => {
-  try {
-    const { name, email, phone } = req.body;
-    const newContact = await addContact({ name, email, phone });
-    res.status(201).json(newContact);
-  } catch (error) {
-    next(error);
-  }
+// router.post("/", validateCreate, async (req, res, next) => {
+//   try {
+//     const { name, email, phone } = req.body;
+//     const newContact = await addContact({ name, email, phone });
+//     res.status(201).json(newContact);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+router.post("/", async (req, res, next) => {
+  const contacts = await Contact.create(req.body);
+  res.json(contacts);
 });
 
 router.delete("/:id", validateId, async (req, res, next) => {
