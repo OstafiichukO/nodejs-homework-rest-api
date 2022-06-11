@@ -21,9 +21,9 @@ const schema = new Schema({
     type: String,
     default: null,
   },
-});
+}, {timestamps: true});
 
-const schemaRegister = Joi.object({
+const schemaSignup = Joi.object({
   password: Joi.string().min(2).max(25).required(),
   email: Joi.string()
     .email({
@@ -31,8 +31,8 @@ const schemaRegister = Joi.object({
       tlds: { allow: ["com", "net", "ua", "goit"] },
     })
     .required(),
-  subscription: Joi.string().required(),
-  token: Joi.string().required(),
+  subscription: Joi.string(),
+  // token: Joi.string().required(),
 });
 
 const schemaLogin = Joi.object({
@@ -49,6 +49,6 @@ const User = model("user", schema);
 
 module.exports = {
   User,
-  schemaRegister,
+  schemaSignup,
   schemaLogin,
 };
