@@ -25,11 +25,20 @@ const loginUser = async (req, res, next) => {
 };
 const logoutUser = async (req, res, next) => {
   try {
-    await authService.logoutUser(req.user._id)
-    res.sendStatus(204)
+    await authService.logoutUser(req.user._id);
+    res.sendStatus(204);
   } catch (e) {
     next(e);
   }
 };
+const currentUser = async (req, res, next) => {
+  const { email, subscription } = req.user;
+  res.json({
+    user: {
+      email,
+      subscription,
+    },
+  });
+};
 
-module.exports = { signupUser, loginUser, logoutUser };
+module.exports = { signupUser, loginUser, logoutUser, currentUser };
