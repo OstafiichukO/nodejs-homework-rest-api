@@ -1,5 +1,5 @@
 const authService = require("../services/user.service");
-//  or '../services'
+const imageService = require("../services/image.service")
 
 const signupUser = async (req, res, next) => {
   try {
@@ -9,6 +9,7 @@ const signupUser = async (req, res, next) => {
       email: user.email,
       subscription: user.subscription,
       id: user._id,
+      avatarURL: user.avatarURL,
     });
   } catch (e) {
     next(e);
@@ -40,5 +41,21 @@ const currentUser = async (req, res, next) => {
     },
   });
 };
+const avatarsUser = async (req, res, next) => {
+  try {
+    const { _id: id } = req.user;
+    const avatarURL = await imageService.uploadImage(id, req.file);
+    await authService.updateUser(id, { avatarURL });
+    res.json({ avatarURL });
+  } catch (e) {
+    next(e);
+  }
+};
 
-module.exports = { signupUser, loginUser, logoutUser, currentUser };
+module.exports = {
+  signupUser,
+  loginUser,
+  logoutUser,
+  currentUser,
+  avatarsUser,
+};

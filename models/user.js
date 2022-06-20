@@ -1,27 +1,37 @@
 /* eslint-disable no-unused-vars */
 const { Schema, model } = require("mongoose");
 const Joi = require("joi");
+const gravatar = require("gravatar");
 
-const schema = new Schema({
-  password: {
-    type: String,
-    required: [true, "Password is required"],
+const schema = new Schema(
+  {
+    password: {
+      type: String,
+      required: [true, "Password is required"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+    },
+    subscription: {
+      type: String,
+      enum: ["starter", "pro", "business"],
+      default: "starter",
+    },
+    token: {
+      type: String,
+      default: null,
+    },
+    avatarURL: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, {}, true);
+      },
+    },
   },
-  email: {
-    type: String,
-    required: [true, "Email is required"],
-    unique: true,
-  },
-  subscription: {
-    type: String,
-    enum: ["starter", "pro", "business"],
-    default: "starter",
-  },
-  token: {
-    type: String,
-    default: null,
-  },
-}, {timestamps: true});
+  { timestamps: true }
+);
 
 const schemaSignup = Joi.object({
   password: Joi.string().min(2).max(25).required(),

@@ -51,9 +51,14 @@ const authenticateUser = async (token) => {
   }
 };
 
+const updateUser = async (id, data) => {
+  return User.findByIdAndUpdate(id, data, { new: true });
+};
+
 module.exports = {
   signupUser,
   loginUser,
   logoutUser,
   authenticateUser,
+  updateUser,
 };
