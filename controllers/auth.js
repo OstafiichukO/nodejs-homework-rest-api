@@ -25,7 +25,7 @@ const signupUser = async (req, res, next) => {
 const confirm = async (req, res, next) => {
   try {
     const { verificationToken } = req.params;
-    const user = await authService.signupUser({ verificationToken });
+    const user = await authService.findUser({ verificationToken });
     if (!user) {
       throw createError(404, "User not found");
     }
@@ -36,6 +36,26 @@ const confirm = async (req, res, next) => {
     return res.status(200).json({
       code: 200,
       message: "Eamil confirmed!",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const resend = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await authService.findUser({ email });
+    if (!user) {
+      throw createError(404, "User not found");
+    }
+    if (!user.verify) {
+      throw createError(404, "Please, verify first");
+    }
+    await emailService.sendEmail(user.email, user.verificationToken);
+    return res.status(200).json({
+      code: 201,
+      message: "check your email",
     });
   } catch (e) {
     next(e);
@@ -85,4 +105,5 @@ module.exports = {
   logoutUser,
   currentUser,
   avatarsUser,
+  resend,
 };
