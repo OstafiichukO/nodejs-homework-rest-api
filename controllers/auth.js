@@ -1,15 +1,61 @@
 const authService = require("../services/user.service");
-const imageService = require("../services/image.service")
+const emailService = require("../services/email.service");
+const imageService = require("../services/image.service");
+const { createError } = require("../helpers/errors");
 
 const signupUser = async (req, res, next) => {
   try {
     const user = await authService.signupUser(req.body);
+    await emailService.sendEmail(user.email, user.verificationToken);
     res.status(201).json({
-      password: user.password,
-      email: user.email,
-      subscription: user.subscription,
-      id: user._id,
-      avatarURL: user.avatarURL,
+      code: 200,
+      data: {
+        password: user.password,
+        email: user.email,
+        subscription: user.subscription,
+        id: user._id,
+        avatarURL: user.avatarURL,
+      },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const confirm = async (req, res, next) => {
+  try {
+    const { verificationToken } = req.params;
+    const user = await authService.findUser({ verificationToken });
+    if (!user) {
+      throw createError(404, "User not found");
+    }
+    await authService.updateUser(user._id, {
+      verify: true,
+      verificationToken: null,
+    });
+    return res.status(200).json({
+      code: 200,
+      message: "Eamil confirmed!",
+    });
+  } catch (e) {
+    next(e);
+  }
+};
+
+const resend = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await authService.findUser({ email });
+    if (!user) {
+      throw createError(404, "User not found");
+    }
+    if (!user.verify) {
+      throw createError(404, "Please, verify first");
+    }
+    await emailService.sendEmail(user.email, user.verificationToken);
+    return res.status(200).json({
+      code: 201,
+      message: "check your email",
     });
   } catch (e) {
     next(e);
@@ -54,8 +100,10 @@ const avatarsUser = async (req, res, next) => {
 
 module.exports = {
   signupUser,
+  confirm,
   loginUser,
   logoutUser,
   currentUser,
   avatarsUser,
+  resend,
 };

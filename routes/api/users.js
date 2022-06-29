@@ -9,6 +9,8 @@ const {
   logoutUser,
   currentUser,
   avatarsUser,
+  confirm,
+  resend,
 } = require("../../controllers/auth");
 const { auth } = require("../../middlewares/auth");
 const upload = require("../../middlewares/upload");
@@ -18,5 +20,7 @@ router.post("/login", validateRequest(schemaLogin), loginUser);
 router.post("/logout", auth, logoutUser);
 router.post("/current", auth, currentUser);
 router.patch("/avatars", auth, upload.single("avatar"), avatarsUser);
+router.get("/verify/:verificationToken", confirm);
+router.post("/verify", resend);
 
 module.exports = router;
